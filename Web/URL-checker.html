@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>URL Legitimacy Checker | SpectroGuard</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: "Poppins", sans-serif;
+    }
+
+    body {
+      display: flex;
+      flex-direction: column;
+      min-height: 100vh;
+      background: #f6f0f0;
+      color: #1a1a1a;
+    }
+
+    header {
+      background:#272727;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    header h2 {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #ffffff;
+    }
+
+.container {
+  max-width: 750px;
+  margin: 40px auto;
+  text-align: center;
+  padding: 40px;
+  flex: 1;
+}
+
+h1 {
+  font-size: 40px;
+  font-weight: 700;
+  margin-bottom: 18px;
+}
+
+p.desc {
+  font-size: 16px;
+  color: #555;
+  margin-bottom: 35px;
+}
+
+input[type="text"] {
+  width: 90%;
+  padding: 16px;
+  border: 2px solid #ddd;
+  border-radius: 10px;
+  font-size: 16px;
+  outline: none;
+  transition: 0.2s;
+}
+
+input:focus {
+  border-color: #888;
+}
+
+button {
+  margin-top: 20px;
+  padding: 14px 28px;
+  font-size: 16px;
+  background: #2d2d2d;
+  color: #fff;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: 0.25s;
+}
+
+button:hover {
+  background: #000;
+}
+
+.result {
+  margin-top: 28px;
+  font-size: 20px;
+  font-weight: 600;
+  word-wrap: break-word;
+}
+
+.extra-info {
+  margin-top: 40px;
+  font-size: 15px;
+  color: #555;
+  line-height: 1.6;
+  text-align: left;
+}
+
+    footer {
+      background: #202020;
+      padding: 30px;
+      color: #ffffff;
+    }
+
+    .footer-content {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .footer-item {
+      display: flex;
+      gap: 12px;
+      align-items: center;
+    }
+
+    .footer-item img {
+      width: 85px;
+      height: 85px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .contact {
+      font-weight: 500;
+      text-align: center;
+    }
+  </style>
+</head>
+
+<body>
+
+<header>
+  <h2>SPECTROGUARD</h2>
+</header>
+
+<div class="container">
+  <h1>URL Legitimacy Checker</h1>
+  <p class="desc">Enter any website URL. This tool checks whitelist and blacklist entries. If the URL is suspicious, heuristic analysis will be performed by the backend.</p>
+
+  <input id="urlInput" type="text" placeholder="Enter website URL..." />
+
+  <button onclick="checkURL()">Check URL</button>
+
+  <div class="result" id="resultText">Result: –</div>
+
+  <div class="extra-info">
+    This tool evaluates website safety by cross-referencing URLs with trusted and malicious databases, then analyzing structure, keywords, and content heuristically to generate an accurate backend risk score for informed, secure browsing decisions. 
+  </div>
+</div>
+
+ <footer>
+    <div class="footer-content">
+      <div class="footer-item">
+        <img src="Sir.jpg" alt="user">
+        <span>Prof. Swapnil Chaudhari 
+            <h5>Guide and Instructor</h5>
+        </span>
+      </div>
+
+      <div class="footer-item">
+        <img src="Pratiksha.jpg" alt="user">
+        <span>Miss. Pratiksha Alhat <br>
+            <h5>Model Design & Tool Development </h5>
+        </span>
+      </div>
+
+      <div class="footer-item">
+        <img src="Kapil.jpg" alt="user">
+        <span>Mr. Kapil Waghumbare<br>
+            <h5>UI/UX & Database</h5>
+        </span>
+      </div>
+
+      <div class="footer-item">
+        <img src="Shraddha.jpg" alt="user">
+        <span>Miss. Shraddha Gadekar<br>
+            <h5>Machine Learning & Testing</h5>
+        </span>
+      </div>
+    </div>
+
+    <div class="contact">
+      Contact us: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="344744515740465b53415546501a59595d40745359555d581a575b59">[email&#160;protected]</a>
+    </div>
+  </footer>
+<script>
+  const resultEl = document.getElementById("resultText");
+
+  document.querySelector("button").addEventListener("click", checkURL);
+
+  async function checkURL() {
+    const url = document.getElementById("urlInput").value.trim();
+    if (!url) { resultEl.textContent = "Result: Please enter a URL"; return; }
+
+    resultEl.textContent = "Analyzing...";
+    resultEl.style.color = "#888";
+
+    try {
+      const res = await fetch("http://127.0.0.1:5000/check_url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url })
+      });
+      if (!res.ok) throw new Error();
+      const data = await res.json();
+      updateUI(data.status, data.result, data.confidence);
+    } catch {
+      resultEl.textContent = "⚠ Backend not running — start app.py";
+      resultEl.style.color = "#cc0000";
+    }
+  }
+
+  function updateUI(status, result, confidence) {
+    if (status === "Safe") {
+      resultEl.textContent = "✅ Safe URL — No threats detected. (Confidence: " + confidence + "%)";
+      resultEl.style.color = "#28a745";
+    } else if (status === "Suspicious") {
+      resultEl.textContent = "🚨 Suspicious URL — Possible phishing or malicious link! (Confidence: " + confidence + "%)";
+      resultEl.style.color = "#cc0000";
+    } else {
+      resultEl.textContent = "⚠ Unknown — Could not analyze this URL.";
+      resultEl.style.color = "#f0ad4e";
+    }
+  }
+</script>
+
+</body>
+</html>
